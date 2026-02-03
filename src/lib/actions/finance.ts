@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import { logFinanceAction } from '@/lib/actions/audit';
 import type {
@@ -50,6 +51,9 @@ export async function addTransaction(input: TransactionInput): Promise<PersonalT
         'USER_MANUAL',
         `Added ${data.type} transaction: ${data.amount}`
     );
+
+    // Revalidate for instant UI update
+    revalidatePath('/finance');
 
     return data as PersonalTransaction;
 }

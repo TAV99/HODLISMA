@@ -26,6 +26,9 @@ import {
     getCryptoAssets,
 } from '@/lib/actions/crypto';
 
+// Import audit logging
+import { createAuditLog } from '@/lib/actions/audit';
+
 export const maxDuration = 30;
 
 // Configure OpenRouter as OpenAI-compatible provider
@@ -128,6 +131,18 @@ export async function POST(req: Request) {
                         });
 
                         if (result) {
+                            // Log to audit
+                            await createAuditLog({
+                                module: 'FINANCE',
+                                action: 'ADD_TRANSACTION',
+                                entityType: 'transaction',
+                                entityId: result.id,
+                                oldData: null,
+                                newData: { amount: result.amount, type: result.type, category: result.category?.name },
+                                triggeredBy: 'AI_TRINITY',
+                                description: `Trinity: Added ${type} ${amount.toLocaleString('vi-VN')}đ`,
+                            });
+
                             return {
                                 success: true,
                                 message: `Đã ghi nhận ${type === 'income' ? 'thu' : type === 'expense' ? 'chi' : 'đầu tư'} ${amount.toLocaleString('vi-VN')}đ`,
@@ -151,6 +166,20 @@ export async function POST(req: Request) {
                     }),
                     execute: async ({ transactionId }) => {
                         const success = await deleteTransaction(transactionId);
+
+                        if (success) {
+                            await createAuditLog({
+                                module: 'FINANCE',
+                                action: 'DELETE_TRANSACTION',
+                                entityType: 'transaction',
+                                entityId: transactionId,
+                                oldData: null,
+                                newData: null,
+                                triggeredBy: 'AI_TRINITY',
+                                description: `Trinity: Deleted transaction ${transactionId}`,
+                            });
+                        }
+
                         return {
                             success,
                             message: success ? 'Đã xóa giao dịch thành công' : 'Không tìm thấy giao dịch để xóa',
@@ -401,24 +430,40 @@ export async function POST(req: Request) {
                         name: z.string().optional().describe('Tên đầy đủ của coin'),
                     }),
                     execute: async ({ symbol, quantity, buyPrice, name }) => {
-                        const result = await addCryptoAsset({
-                            symbol,
-                            quantity,
-                            buy_price: buyPrice,
-                            name,
-                        });
-                        if (result) {
-                            return {
-                                success: true,
-                                message: `Đã thêm ${quantity} ${symbol.toUpperCase()} vào portfolio với giá $${buyPrice}`,
-                                asset: {
-                                    symbol: result.symbol,
-                                    quantity: result.quantity,
-                                    buyPrice: result.buy_price,
-                                },
-                            };
+                        try {
+                            const result = await addCryptoAsset({
+                                symbol,
+                                quantity,
+                                buy_price: buyPrice,
+                                name,
+                            });
+                            if (result) {
+                                await createAuditLog({
+                                    module: 'CRYPTO',
+                                    action: 'ADD_ASSET',
+                                    entityType: 'asset',
+                                    entityId: result.id,
+                                    oldData: null,
+                                    newData: { symbol: result.symbol, quantity, buyPrice },
+                                    triggeredBy: 'AI_TRINITY',
+                                    description: `Trinity: Added ${quantity} ${symbol.toUpperCase()} @ $${buyPrice}`,
+                                });
+
+                                return {
+                                    success: true,
+                                    message: `Đã thêm ${quantity} ${symbol.toUpperCase()} vào portfolio với giá $${buyPrice}`,
+                                    asset: {
+                                        symbol: result.symbol,
+                                        quantity: result.quantity,
+                                        buyPrice: result.buy_price,
+                                    },
+                                };
+                            }
+                            return { success: false, message: 'Không thể thêm coin. Vui lòng thử lại.' };
+                        } catch (error) {
+                            console.error('addCryptoAsset error:', error);
+                            return { success: false, message: 'Lỗi hệ thống khi thêm coin. Vui lòng thử lại.' };
                         }
-                        return { success: false, message: 'Không thể thêm coin. Vui lòng thử lại.' };
                     },
                 }),
 

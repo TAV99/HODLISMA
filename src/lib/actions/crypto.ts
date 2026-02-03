@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import { logCryptoAction } from '@/lib/actions/audit';
 import type { Asset, AssetInput } from '@/lib/types';
@@ -37,6 +38,9 @@ export async function addCryptoAsset(input: AssetInput): Promise<Asset | null> {
         'USER_MANUAL',
         `Added ${data.quantity} ${data.symbol} @ $${data.buy_price}`
     );
+
+    // Revalidate for instant UI update
+    revalidatePath('/');
 
     return data as Asset;
 }
@@ -139,6 +143,9 @@ export async function buyCrypto(
         `Bought ${additionalQuantity} more ${symbol.toUpperCase()}`
     );
 
+    // Revalidate for instant UI update
+    revalidatePath('/');
+
     return data as Asset;
 }
 
@@ -174,6 +181,7 @@ export async function sellCrypto(
             return { success: false, remainingQuantity: existing.quantity, removed: false };
         }
 
+        revalidatePath('/');
         return { success: true, remainingQuantity: 0, removed: true };
     }
 
@@ -188,6 +196,7 @@ export async function sellCrypto(
         return { success: false, remainingQuantity: existing.quantity, removed: false };
     }
 
+    revalidatePath('/');
     return { success: true, remainingQuantity, removed: false };
 }
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from 'ai/react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { usePortfolio } from '@/lib/hooks';
 import ReactMarkdown from 'react-markdown';
 import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -17,6 +17,7 @@ export function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const pathname = usePathname();
+    const router = useRouter();
     const { assets, prices, isLoading: portfolioLoading } = usePortfolio();
 
     // Determine current page context
@@ -76,6 +77,10 @@ export function ChatWidget() {
         api: '/api/chat',
         body: {
             portfolioContext,
+        },
+        onFinish: () => {
+            // Force browser to reload data from Server without page reload
+            router.refresh();
         },
     });
 
