@@ -35,6 +35,10 @@ yarn-error.log*
 
 # vercel
 .vercel
+.agents
+.opencode
+.claude
+.agent
 
 # typescript
 *.tsbuildinfo
