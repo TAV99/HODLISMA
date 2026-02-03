@@ -1,7 +1,6 @@
 'use client';
 
 import { AssetTable } from '@/components/dashboard/AssetTable';
-import { AddAssetDialog } from '@/components/dashboard/AddAssetDialog';
 import { PortfolioSummary } from '@/components/dashboard/PortfolioSummary';
 import { usePortfolio } from '@/lib/hooks';
 import { Sparkles } from 'lucide-react';
@@ -29,9 +28,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* Add Asset Button */}
-          <AddAssetDialog />
         </header>
 
         {/* Portfolio Summary */}

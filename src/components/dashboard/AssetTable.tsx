@@ -24,6 +24,7 @@ import { usePortfolio, useDeleteAsset } from '@/lib/hooks';
 import { formatCurrency, formatPercent, cn } from '@/lib/utils';
 import { Loader2, RefreshCw, TrendingUp, TrendingDown, Pencil, Trash2, Coins } from 'lucide-react';
 import { EditAssetDialog } from '@/components/dashboard/EditAssetDialog';
+import { AddAssetDialog } from '@/components/dashboard/AddAssetDialog';
 import type { Asset, MarketData } from '@/lib/types';
 
 /**
@@ -168,24 +169,27 @@ export function AssetTable() {
         <div className="relative">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/30">
-                        <Coins className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-                    </div>
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                        Portfolio Assets
-                    </h2>
+                {/* Left: Title */}
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                    Portfolio Assets
+                </h2>
+
+                {/* Right: Actions Group */}
+                <div className="flex gap-2">
+                    {/* Refresh Button */}
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => refetch()}
+                        disabled={isRefetching}
+                        className="bg-white/50 hover:bg-white/70 border-white/30 backdrop-blur-sm"
+                    >
+                        <RefreshCw className={cn("h-4 w-4", isRefetching && "animate-spin")} />
+                    </Button>
+
+                    {/* Add Asset Button */}
+                    <AddAssetDialog />
                 </div>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => refetch()}
-                    disabled={isRefetching}
-                    className="gap-2 bg-white/50 hover:bg-white/70 border-white/30 backdrop-blur-sm"
-                >
-                    <RefreshCw className={cn("h-4 w-4", isRefetching && "animate-spin")} />
-                    Refresh
-                </Button>
             </div>
 
             {/* Loading State */}

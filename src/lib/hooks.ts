@@ -46,8 +46,8 @@ export function useCryptoPrices(symbols: string[]) {
         },
         // Only fetch when we have symbols
         enabled: symbols.length > 0,
-        // Refetch every 60 seconds for real-time updates
-        refetchInterval: 60000,
+        // Auto-refresh every 10 minutes to keep data fresh
+        refetchInterval: 600000,
         // Keep previous data while refetching
         placeholderData: (previousData) => previousData,
     });
@@ -70,7 +70,7 @@ export function usePortfolio() {
         assets: assetsQuery.data ?? [],
         prices: pricesQuery.data ?? {},
         isLoading: assetsQuery.isLoading || pricesQuery.isLoading,
-        isRefetching: pricesQuery.isRefetching,
+        isRefetching: assetsQuery.isRefetching || pricesQuery.isRefetching,
         error: assetsQuery.error || pricesQuery.error,
         refetch: () => {
             assetsQuery.refetch();
