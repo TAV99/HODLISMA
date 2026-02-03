@@ -5,6 +5,7 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ChatWidget } from "@/components/ai/ChatWidget";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HODLISMA | Crypto Portfolio Tracker",
-  description: "Track your crypto assets with holographic elegance. The Art of Holding.",
+  title: "HODLISMA | Crypto Portfolio & Personal Finance",
+  description: "Track your crypto assets and manage personal finances with AI-powered insights.",
 };
 
 export default function RootLayout({
@@ -32,7 +33,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          {children}
+          <AppLayout>
+            {children}
+          </AppLayout>
           <ChatWidget />
         </QueryProvider>
         <Analytics />

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from 'ai/react';
+import { usePathname } from 'next/navigation';
 import { usePortfolio } from '@/lib/hooks';
 import ReactMarkdown from 'react-markdown';
 import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
@@ -15,10 +16,16 @@ import { cn } from '@/lib/utils';
 export function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const pathname = usePathname();
     const { assets, prices, isLoading: portfolioLoading } = usePortfolio();
+
+    // Determine current page context
+    const pageContext = pathname.startsWith('/finance') ? 'finance' : 'crypto';
+    const isFinancePage = pageContext === 'finance';
 
     // Calculate portfolio totals and metrics
     const portfolioContext = {
+        currentPage: pageContext,
         assets: assets.map(asset => {
             const priceData = prices[asset.symbol.toUpperCase()];
             const currentPrice = priceData?.price ?? 0;
@@ -100,8 +107,12 @@ export function ChatWidget() {
                                 <Bot className="h-4 w-4 text-white" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-white text-sm">HODLISMA AI</h3>
-                                <p className="text-xs text-slate-400">Portfolio Advisor</p>
+                                <h3 className="font-semibold text-white text-sm">
+                                    {isFinancePage ? 'Trinity AI' : 'HODLISMA AI'}
+                                </h3>
+                                <p className="text-xs text-slate-400">
+                                    {isFinancePage ? 'Trợ lý tài chính' : 'Portfolio Advisor'}
+                                </p>
                             </div>
                         </div>
                         <Button
@@ -119,9 +130,13 @@ export function ChatWidget() {
                         {messages.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full text-center text-slate-400">
                                 <Sparkles className="h-12 w-12 mb-3 text-indigo-400" />
-                                <p className="text-sm font-medium text-white mb-1">Hi! I'm HODLISMA AI</p>
+                                <p className="text-sm font-medium text-white mb-1">
+                                    {isFinancePage ? 'Xin chào! Tôi là Trinity AI' : "Hi! I'm HODLISMA AI"}
+                                </p>
                                 <p className="text-xs max-w-xs">
-                                    Ask me about your portfolio, market trends, or get investment advice!
+                                    {isFinancePage
+                                        ? 'Hỏi tôi về thu chi, tiết kiệm, hoặc ghi chép giao dịch!'
+                                        : 'Ask me about your portfolio, market trends, or get investment advice!'}
                                 </p>
                             </div>
                         )}
@@ -176,7 +191,7 @@ export function ChatWidget() {
                             <input
                                 value={input}
                                 onChange={handleInputChange}
-                                placeholder="Ask about your portfolio..."
+                                placeholder={isFinancePage ? 'Ghi chi 50k ăn trưa...' : 'Ask about your portfolio...'}
                                 disabled={isLoading || portfolioLoading}
                                 className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                             />

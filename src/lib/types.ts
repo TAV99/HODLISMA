@@ -72,3 +72,95 @@ export interface ApiError {
     message: string;
     status?: number;
 }
+
+// ============================================
+// Personal Finance - TypeScript Interfaces
+// ============================================
+
+/**
+ * Finance category types
+ */
+export type FinanceCategoryType = 'income' | 'expense';
+export type TransactionType = 'income' | 'expense' | 'investment';
+
+/**
+ * Finance category entity
+ */
+export interface FinanceCategory {
+    id: string;
+    name: string;
+    type: FinanceCategoryType;
+    icon: string;
+    color: string;
+    created_at: string;
+}
+
+/**
+ * Personal transaction entity
+ */
+export interface PersonalTransaction {
+    id: string;
+    user_id: string;
+    category_id: string | null;
+    amount: number;
+    date: string;
+    note: string | null;
+    type: TransactionType;
+    created_at: string;
+    // Joined data
+    category?: FinanceCategory;
+}
+
+/**
+ * Savings vault entity
+ */
+export interface SavingsVault {
+    id: string;
+    name: string;
+    target_amount: number;
+    current_amount: number;
+    is_completed: boolean;
+    created_at: string;
+    completed_at: string | null;
+}
+
+/**
+ * Monthly summary statistics
+ */
+export interface MonthlySummary {
+    total_income: number;
+    total_expense: number;
+    total_investment: number;
+    net_balance: number;
+    transaction_count: number;
+}
+
+/**
+ * Form input for creating/updating a transaction
+ */
+export interface TransactionInput {
+    category_id?: string;
+    amount: number;
+    date: string;
+    note?: string;
+    type: TransactionType;
+}
+
+/**
+ * Form input for creating/updating a savings vault
+ */
+export interface SavingsVaultInput {
+    name: string;
+    target_amount: number;
+    current_amount?: number;
+}
+
+/**
+ * Form input for creating a category
+ */
+export interface CategoryInput {
+    name: string;
+    type: FinanceCategoryType;
+    icon?: string;
+    color?: string;
+}
