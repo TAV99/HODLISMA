@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         const isFinancePage = currentPage === 'finance';
 
         const systemPrompt = isFinancePage
-            ? `Bạn là Trinity AI, trợ lý tài chính cá nhân thông minh.
+            ? `Bạn là HODLISMA AI, trợ lý tài chính cá nhân thông minh.
 
 **Người dùng đang ở trang Personal Finance.**
 
@@ -139,8 +139,8 @@ export async function POST(req: Request) {
                                 entityId: result.id,
                                 oldData: null,
                                 newData: { amount: result.amount, type: result.type, category: result.category?.name },
-                                triggeredBy: 'AI_TRINITY',
-                                description: `Trinity: Added ${type} ${amount.toLocaleString('vi-VN')}đ`,
+                                triggeredBy: 'AI_HODLISMA',
+                                description: `HODLISMA: Added ${type} ${amount.toLocaleString('vi-VN')}đ`,
                             });
 
                             return {
@@ -175,8 +175,8 @@ export async function POST(req: Request) {
                                 entityId: transactionId,
                                 oldData: null,
                                 newData: null,
-                                triggeredBy: 'AI_TRINITY',
-                                description: `Trinity: Deleted transaction ${transactionId}`,
+                                triggeredBy: 'AI_HODLISMA',
+                                description: `HODLISMA: Deleted transaction ${transactionId}`,
                             });
                         }
 
@@ -445,8 +445,8 @@ export async function POST(req: Request) {
                                     entityId: result.id,
                                     oldData: null,
                                     newData: { symbol: result.symbol, quantity, buyPrice },
-                                    triggeredBy: 'AI_TRINITY',
-                                    description: `Trinity: Added ${quantity} ${symbol.toUpperCase()} @ $${buyPrice}`,
+                                    triggeredBy: 'AI_HODLISMA',
+                                    description: `HODLISMA: Added ${quantity} ${symbol.toUpperCase()} @ $${buyPrice}`,
                                 });
 
                                 return {
@@ -556,7 +556,7 @@ export async function POST(req: Request) {
 
         return result.toDataStreamResponse();
     } catch (error) {
-        console.error("Trinity AI Error:", error);
+        console.error("HODLISMA AI Error:", error);
         return new Response(JSON.stringify({ error: "AI Agent is currently busy. Please try again." }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }

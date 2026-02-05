@@ -113,7 +113,7 @@ export function ChatWidget() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-white text-sm">
-                                    {isFinancePage ? 'Trinity AI' : 'HODLISMA AI'}
+                                    {'HODLISMA AI'}
                                 </h3>
                                 <p className="text-xs text-slate-400">
                                     {isFinancePage ? 'Trợ lý tài chính' : 'Portfolio Advisor'}
@@ -136,7 +136,7 @@ export function ChatWidget() {
                             <div className="flex flex-col items-center justify-center h-full text-center text-slate-400">
                                 <Sparkles className="h-12 w-12 mb-3 text-indigo-400" />
                                 <p className="text-sm font-medium text-white mb-1">
-                                    {isFinancePage ? 'Xin chào! Tôi là Trinity AI' : "Hi! I'm HODLISMA AI"}
+                                    {isFinancePage ? 'Xin chào! Tôi là HODLISMA AI' : "Hi! I'm HODLISMA AI"}
                                 </p>
                                 <p className="text-xs max-w-xs">
                                     {isFinancePage

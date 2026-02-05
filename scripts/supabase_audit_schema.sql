@@ -5,7 +5,7 @@
 
 -- Create enum types
 CREATE TYPE audit_module AS ENUM ('CRYPTO', 'FINANCE', 'SYSTEM');
-CREATE TYPE audit_trigger AS ENUM ('USER_MANUAL', 'AI_TRINITY');
+CREATE TYPE audit_trigger AS ENUM ('USER_MANUAL', 'AI_HODLISMA');
 
 -- Main audit_logs table
 CREATE TABLE IF NOT EXISTS audit_logs (
@@ -103,4 +103,4 @@ COMMENT ON COLUMN audit_logs.module IS 'CRYPTO, FINANCE, or SYSTEM';
 COMMENT ON COLUMN audit_logs.action IS 'Specific action like ADD_ASSET, DELETE_TRANSACTION';
 COMMENT ON COLUMN audit_logs.old_data IS 'JSON snapshot before change (for rollback)';
 COMMENT ON COLUMN audit_logs.new_data IS 'JSON snapshot after change';
-COMMENT ON COLUMN audit_logs.triggered_by IS 'USER_MANUAL or AI_TRINITY';
+COMMENT ON COLUMN audit_logs.triggered_by IS 'USER_MANUAL or AI_HODLISMA';

@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 // ============================================
 
 export type AuditModule = 'CRYPTO' | 'FINANCE' | 'SYSTEM';
-export type AuditTrigger = 'USER_MANUAL' | 'AI_TRINITY';
+export type AuditTrigger = 'USER_MANUAL' | 'AI_HODLISMA';
 
 export interface AuditLogInput {
     module: AuditModule;

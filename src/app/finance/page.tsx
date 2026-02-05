@@ -107,7 +107,7 @@ export default function FinancePage() {
                     <div className="flex items-center justify-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         <span>Powered by</span>
                         <span className="font-semibold bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
-                            Trinity AI
+                            HODLISMA AI
                         </span>
                         <Sparkles className="h-4 w-4 text-emerald-500" />
                     </div>
