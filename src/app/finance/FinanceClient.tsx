@@ -37,6 +37,12 @@ export default function FinanceClient({
         year: 'numeric'
     });
 
+    // Sync state with props when server data changes (after router.refresh())
+    useEffect(() => {
+        setSummary(initialSummary);
+        setTransactions(initialTransactions);
+    }, [initialSummary, initialTransactions]);
+
     // Refresh data function (can be triggered by user actions)
     async function refreshData() {
         setIsLoading(true);
