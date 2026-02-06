@@ -85,17 +85,17 @@ CREATE INDEX IF NOT EXISTS idx_savings_vault_completed ON savings_vault(is_compl
 -- ============================================
 -- Uncomment these when implementing authentication
 
--- ALTER TABLE finance_categories ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE personal_transactions ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE savings_vault ENABLE ROW LEVEL SECURITY;
+ALTER TABLE finance_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE personal_transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE savings_vault ENABLE ROW LEVEL SECURITY;
 
--- CREATE POLICY "Allow public read for categories"
--- ON finance_categories FOR SELECT
--- USING (true);
+CREATE POLICY "Allow public read for categories"
+ON finance_categories FOR SELECT
+USING (true);
 
--- CREATE POLICY "Users can manage own transactions"
--- ON personal_transactions FOR ALL
--- USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own transactions"
+ON personal_transactions FOR ALL
+USING (auth.uid() = user_id);
 
 -- ============================================
 -- 5. HELPER FUNCTIONS

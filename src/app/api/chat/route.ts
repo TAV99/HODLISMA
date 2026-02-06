@@ -61,7 +61,12 @@ export async function POST(req: Request) {
 - Tra cứu giao dịch: Dùng tool getTransactions
 - Tổng hợp tháng: Dùng tool getFinancialSummary
 - Quản lý tiết kiệm: Dùng getSavings và updateSavings
-- Quản lý danh mục: Dùng getCategories và manageCategory
+- Quản lý danh mục: Dùng getFinanceCategories và manageCategory
+
+**🚨 QUY TẮC BẮT BUỘC - CRITICAL:**
+1. TRƯỚC KHI phân loại BẤT KỲ giao dịch nào, bạn PHẢI gọi tool \`getFinanceCategories\` để xem danh sách danh mục THỰC TẾ trong database
+2. KHÔNG BAO GIỜ đoán tên danh mục - chỉ sử dụng tên CHÍNH XÁC từ database
+3. Nếu người dùng yêu cầu danh mục không tồn tại, HỎI XÁC NHẬN để tạo mới thay vì đoán
 
 **Quy tắc quản lý danh mục:**
 1. Bạn có quyền tạo, sửa, xóa danh mục thu/chi
@@ -252,8 +257,8 @@ export async function POST(req: Request) {
                 // ============================================
                 // CATEGORIES
                 // ============================================
-                getCategories: tool({
-                    description: 'Lấy danh sách các hạng mục thu/chi. Dùng khi cần biết các category có sẵn.',
+                getFinanceCategories: tool({
+                    description: 'Lấy danh sách đầy đủ các danh mục thu chi hiện có. LUÔN gọi tool này TRƯỚC KHI thực hiện thêm/sửa/xóa giao dịch để đảm bảo chính xác ID và Tên danh mục.',
                     parameters: z.object({
                         type: z.enum(['income', 'expense']).optional().describe('Lọc theo loại: income hoặc expense'),
                     }),
@@ -261,6 +266,7 @@ export async function POST(req: Request) {
                         const categories = await getCategories(type);
                         return {
                             success: true,
+                            count: categories.length,
                             categories: categories.map(c => ({
                                 id: c.id,
                                 name: c.name,
@@ -268,6 +274,7 @@ export async function POST(req: Request) {
                                 icon: c.icon,
                                 color: c.color,
                             })),
+                            hint: 'Sử dụng chính xác tên danh mục từ danh sách này khi thêm giao dịch.',
                         };
                     },
                 }),

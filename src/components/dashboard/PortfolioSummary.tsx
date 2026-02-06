@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatCurrency, formatPercent, cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, Sparkles } from 'lucide-react';
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import type { Asset, MarketPriceResponse } from '@/lib/types';
 
 // Chart colors - High Contrast Vibrant Fintech Palette
@@ -122,13 +123,15 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: { payl
 function MetricCard({
     title,
     value,
+    format,
     subtitle,
     icon: Icon,
     variant = 'default',
     sparkle = false,
 }: {
     title: string;
-    value: string;
+    value: string | number;
+    format?: (value: number) => string;
     subtitle?: string;
     icon: React.ElementType;
     variant?: 'default' | 'positive' | 'negative';
@@ -172,7 +175,11 @@ function MetricCard({
                             variant === 'negative' && "text-rose-600 dark:text-rose-400",
                             variant === 'default' && "text-zinc-900 dark:text-zinc-100"
                         )}>
-                            {value}
+                            {typeof value === 'number' && format ? (
+                                <AnimatedNumber value={value} format={format} />
+                            ) : (
+                                value
+                            )}
                         </span>
                         {sparkle && (
                             <Sparkles className="h-5 w-5 text-amber-500 pulse-live" />
@@ -241,7 +248,8 @@ export function PortfolioSummary({ assets, prices, isLoading }: PortfolioSummary
             <div className="grid gap-6 md:grid-cols-3">
                 <MetricCard
                     title="Current Balance"
-                    value={formatCurrency(metrics.currentBalance)}
+                    value={metrics.currentBalance}
+                    format={formatCurrency}
                     icon={Wallet}
                     variant="default"
                     sparkle
