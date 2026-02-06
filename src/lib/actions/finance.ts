@@ -54,6 +54,7 @@ export async function addTransaction(input: TransactionInput): Promise<PersonalT
 
     // Revalidate for instant UI update
     revalidatePath('/finance');
+    revalidatePath('/');
 
     return data as PersonalTransaction;
 }
@@ -86,6 +87,8 @@ export async function updateTransaction(
         return null;
     }
 
+    revalidatePath('/finance');
+    revalidatePath('/');
     return data as PersonalTransaction;
 }
 
@@ -103,6 +106,8 @@ export async function deleteTransaction(id: string): Promise<boolean> {
         return false;
     }
 
+    revalidatePath('/finance');
+    revalidatePath('/');
     return true;
 }
 
@@ -245,6 +250,7 @@ export async function addCategory(input: CategoryInput): Promise<FinanceCategory
         return null;
     }
 
+    revalidatePath('/finance');
     return data as FinanceCategory;
 }
 
@@ -273,6 +279,7 @@ export async function updateCategory(
         return null;
     }
 
+    revalidatePath('/finance');
     return data as FinanceCategory;
 }
 
@@ -329,6 +336,7 @@ export async function deleteCategory(
         return { success: false, message: 'Không thể xóa danh mục' };
     }
 
+    revalidatePath('/finance');
     return { success: true, message: 'Đã xóa danh mục thành công' };
 }
 
@@ -420,6 +428,7 @@ export async function addSavingsVault(input: SavingsVaultInput): Promise<Savings
         return null;
     }
 
+    revalidatePath('/finance');
     return data as SavingsVault;
 }
 
@@ -446,6 +455,7 @@ export async function updateSavingsVault(
         return null;
     }
 
+    revalidatePath('/finance');
     return data as SavingsVault;
 }
 
@@ -463,6 +473,7 @@ export async function deleteSavingsVault(id: string): Promise<boolean> {
         return false;
     }
 
+    revalidatePath('/finance');
     return true;
 }
 

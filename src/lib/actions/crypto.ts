@@ -214,6 +214,7 @@ export async function removeCryptoAsset(symbol: string): Promise<boolean> {
         return false;
     }
 
+    revalidatePath('/');
     return true;
 }
 

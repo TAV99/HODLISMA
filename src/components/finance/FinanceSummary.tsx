@@ -1,9 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale } from 'lucide-react';
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
+import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import type { MonthlySummary } from '@/lib/types';
 
 interface FinanceSummaryProps {
@@ -21,18 +24,22 @@ function formatVND(amount: number): string {
     }).format(amount) + 'đ';
 }
 
+
+
 /**
  * Premium Metric Card for Finance
  */
 function MetricCard({
     title,
     value,
+    format,
     icon: Icon,
     variant = 'default',
     trend,
 }: {
     title: string;
-    value: string;
+    value: string | number;
+    format?: (value: number) => string;
     icon: React.ElementType;
     variant?: 'default' | 'income' | 'expense' | 'balance';
     trend?: 'up' | 'down';
@@ -85,7 +92,11 @@ function MetricCard({
                             "text-3xl font-bold font-mono tracking-tight tabular-nums",
                             colors.value
                         )}>
-                            {value}
+                            {typeof value === 'number' && format ? (
+                                <AnimatedNumber value={value} format={format} />
+                            ) : (
+                                value
+                            )}
                         </span>
                         {trend && (
                             trend === 'up' ? (
@@ -125,6 +136,30 @@ function SummarySkeleton() {
  * Displays key financial metrics with holographic card effect
  */
 export function FinanceSummary({ summary, isLoading }: FinanceSummaryProps) {
+    const router = useRouter();
+
+    // Real-time subscription to refresh data when transactions change
+    useEffect(() => {
+        const channel = supabase
+            .channel('finance_summary_realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'personal_transactions',
+                },
+                () => {
+                    router.refresh();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [router]);
+
     const netBalance = useMemo(() => {
         return summary.total_income - summary.total_expense;
     }, [summary]);
@@ -139,19 +174,22 @@ export function FinanceSummary({ summary, isLoading }: FinanceSummaryProps) {
         <div className="grid gap-6 md:grid-cols-3">
             <MetricCard
                 title="Thu nhập tháng"
-                value={formatVND(summary.total_income)}
+                value={summary.total_income}
+                format={formatVND}
                 icon={TrendingUp}
                 variant="income"
             />
             <MetricCard
                 title="Chi tiêu tháng"
-                value={formatVND(summary.total_expense)}
+                value={summary.total_expense}
+                format={formatVND}
                 icon={TrendingDown}
                 variant="expense"
             />
             <MetricCard
                 title="Số dư"
-                value={`${isPositive ? '+' : ''}${formatVND(netBalance)}`}
+                value={netBalance}
+                format={(val) => `${val >= 0 ? '+' : ''}${formatVND(val)}`}
                 icon={isPositive ? Wallet : Scale}
                 variant={isPositive ? 'income' : 'expense'}
                 trend={isPositive ? 'up' : 'down'}

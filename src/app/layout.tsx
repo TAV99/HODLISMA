@@ -7,6 +7,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ChatWidget } from "@/components/ai/ChatWidget";
 import { AppLayout } from "@/components/layout/AppLayout";
 
+import { RealtimeListener } from "@/components/providers/RealtimeListener";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,6 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
+          <RealtimeListener />
           <AppLayout>
             {children}
           </AppLayout>
