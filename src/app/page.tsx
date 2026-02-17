@@ -45,12 +45,16 @@ export default function Home() {
         </section>
 
         {/* Footer */}
-        <footer className="mt-16 pt-8 border-t border-white/10">
-          <div className="flex items-center justify-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
-            <span>Design by</span>
-            <span className="font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-              TAV
-            </span>
+        <footer className="mt-16 py-8 border-t border-white/10 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <span>© {new Date().getFullYear()} HODLISMA. All rights reserved.</span>
+            <span className="hidden sm:inline">•</span>
+            <div className="flex items-center gap-1">
+              <span>Design by</span>
+              <span className="font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                TAV
+              </span>
+            </div>
           </div>
         </footer>
       </div>
