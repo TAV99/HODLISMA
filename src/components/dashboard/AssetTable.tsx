@@ -269,7 +269,7 @@ export function AssetTable() {
 
                                             {/* Quantity */}
                                             <TableCell className="text-right font-mono tabular-nums text-slate-700 dark:text-slate-300 font-medium">
-                                                {asset.quantity.toLocaleString(undefined, { maximumFractionDigits: 8 })}
+                                                {asset.quantity.toLocaleString('en-US', { maximumFractionDigits: 8 })}
                                             </TableCell>
 
                                             {/* Buy Price */}

@@ -1,11 +1,11 @@
 'use client';
 
+import { useState, useEffect, MouseEvent } from 'react';
 import { RotateCcw, Bitcoin, Wallet, Bot, User, Clock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { type AuditLog } from '@/lib/actions/audit';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { MouseEvent } from 'react';
 
 interface ActivityCardProps {
     log: AuditLog;
@@ -102,8 +102,23 @@ export function ActivityCard({ log, onRollback, isRollingBack }: ActivityCardPro
     const isAI = log.triggeredBy === 'AI_HODLISMA';
     const canRollback = log.oldData !== null || log.action.includes('ADD');
     const isRollbackAction = log.action.includes('ROLLBACK');
-    const isRecent = isRecentLog(log.createdAt);
     const isRare = getRareStatus(log);
+
+    // Defer time-dependent values to client to avoid hydration mismatch
+    const [isRecent, setIsRecent] = useState(false);
+    const [relativeTime, setRelativeTime] = useState<string | null>(null);
+
+    useEffect(() => {
+        setIsRecent(isRecentLog(log.createdAt));
+        setRelativeTime(formatRelativeTime(log.createdAt));
+
+        // Update relative time every 30 seconds
+        const interval = setInterval(() => {
+            setIsRecent(isRecentLog(log.createdAt));
+            setRelativeTime(formatRelativeTime(log.createdAt));
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [log.createdAt]);
 
     // 3D Tilt Logic
     const x = useMotionValue(0);
@@ -265,7 +280,7 @@ export function ActivityCard({ log, onRollback, isRollingBack }: ActivityCardPro
                     <div className="flex items-center gap-4 text-xs text-slate-400 font-medium">
                         <span className="flex items-center gap-1.5">
                             <Clock className="h-3 w-3" />
-                            {formatRelativeTime(log.createdAt)}
+                            {relativeTime ?? new Date(log.createdAt).toLocaleDateString('vi-VN')}
                         </span>
                         {/* Trigger badge */}
                         <span

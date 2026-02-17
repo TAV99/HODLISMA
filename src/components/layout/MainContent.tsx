@@ -13,7 +13,10 @@ export function MainContent({ children }: { children: React.ReactNode }) {
         <main
             className={cn(
                 "flex-1 overflow-y-auto transition-all duration-300 ease-in-out relative z-10",
-                collapsed ? "ml-20" : "ml-64"
+                // Mobile: remove left margin
+                "ml-0",
+                // Desktop: apply margin based on sidebar state
+                collapsed ? "md:ml-20" : "md:ml-64"
             )}
         >
             {children}

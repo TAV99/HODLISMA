@@ -27,15 +27,21 @@ export default function FinanceClient({
     const [summary, setSummary] = useState<MonthlySummary>(initialSummary);
     const [transactions, setTransactions] = useState<PersonalTransaction[]>(initialTransactions);
     const [isLoading, setIsLoading] = useState(false);
+    const [monthName, setMonthName] = useState('');
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
 
-    const monthName = new Date(currentYear, currentMonth - 1).toLocaleDateString('vi-VN', {
-        month: 'long',
-        year: 'numeric'
-    });
+    // Defer locale-dependent date formatting to client to avoid hydration mismatch
+    useEffect(() => {
+        setMonthName(
+            new Date(currentYear, currentMonth - 1).toLocaleDateString('vi-VN', {
+                month: 'long',
+                year: 'numeric',
+            })
+        );
+    }, [currentYear, currentMonth]);
 
     // Sync state with props when server data changes (after router.refresh())
     useEffect(() => {
