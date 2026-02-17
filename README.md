@@ -74,6 +74,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 # AI & LLM Provider (OpenRouter/OpenAI/Google)
 OPENROUTER_API_KEY=your_openrouter_api_key
 
+# Optional: Custom AI Model (default: arcee-ai/trinity-large-preview:free)
+AI_MODEL_NAME=google/gemini-2.0-flash-001
+
 # Crypto Data Provider
 CMC_PRO_API_KEY=your_coinmarketcap_api_key
 ```

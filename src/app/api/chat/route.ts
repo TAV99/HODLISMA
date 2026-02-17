@@ -97,7 +97,7 @@ export async function POST(req: Request) {
 **Available Tools:** addCryptoAsset, buyCrypto, sellCrypto, removeCryptoAsset, getCryptoPortfolio`;
 
         const result = await streamText({
-            model: openrouter('arcee-ai/trinity-large-preview:free'),
+            model: openrouter(process.env.AI_MODEL_NAME || 'arcee-ai/trinity-large-preview:free'),
             messages: [
                 { role: 'system', content: systemPrompt },
                 ...messages,
