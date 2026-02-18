@@ -201,10 +201,11 @@ export function AssetTable() {
             {/* Empty State */}
             {!isLoading && !error && assets.length === 0 && <EmptyState />}
 
-            {/* Data Table */}
+            {/* Data Table (Desktop) */}
             {!isLoading && !error && assets.length > 0 && (
                 <>
-                    <div className="overflow-hidden rounded-2xl bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-2xl">
+                    {/* Desktop View */}
+                    <div className="hidden md:block overflow-hidden rounded-2xl bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-2xl">
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-b border-slate-200/50 dark:border-slate-700/50 hover:bg-transparent">
@@ -362,6 +363,91 @@ export function AssetTable() {
                                 })}
                             </TableBody>
                         </Table>
+                    </div>
+
+                    {/* Mobile View (Cards) */}
+                    <div className="md:hidden space-y-4">
+                        {assets.map((asset) => {
+                            const priceData = prices[asset.symbol.toUpperCase()];
+                            const metrics = calculateMetrics(asset, priceData);
+                            const isProfitable = metrics.pnl >= 0;
+                            const isPositive24h = metrics.percentChange24h >= 0;
+
+                            return (
+                                <div
+                                    key={asset.id}
+                                    className="glass-card rounded-2xl p-4 bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white/20 shadow-lg"
+                                >
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                                {asset.symbol.slice(0, 2).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-lg text-slate-900 dark:text-slate-100">
+                                                    {asset.symbol.toUpperCase()}
+                                                </div>
+                                                <div className="text-sm text-slate-500 dark:text-slate-400 font-mono">
+                                                    {asset.quantity.toLocaleString()} {asset.symbol.toUpperCase()}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="font-bold text-lg text-slate-900 dark:text-slate-100 font-mono">
+                                                {formatCurrency(metrics.totalValue)}
+                                            </div>
+                                            <div className="text-sm text-slate-500 dark:text-slate-400 font-mono">
+                                                {formatCurrency(metrics.currentPrice)}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200/50 dark:border-white/10">
+                                        <div>
+                                            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">24h Change</div>
+                                            <div className={cn(
+                                                "flex items-center gap-1 font-mono font-medium",
+                                                isPositive24h ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                                            )}>
+                                                {isPositive24h ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                                                {formatPercent(metrics.percentChange24h)}
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">PnL</div>
+                                            <div className={cn(
+                                                "font-mono font-bold",
+                                                isProfitable ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                                            )}>
+                                                {isProfitable ? '+' : ''}{formatCurrency(metrics.pnl)}
+                                                <span className="text-xs font-normal ml-1 opacity-75">
+                                                    ({formatPercent(metrics.pnlPercent)})
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 mt-4 pt-4 border-t border-slate-200/50 dark:border-white/10">
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1"
+                                            onClick={() => handleEdit(asset)}
+                                        >
+                                            <Pencil className="h-4 w-4 mr-2" />
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            className="flex-1 hover:bg-rose-100 hover:text-rose-600 dark:hover:bg-rose-900/20"
+                                            onClick={() => handleDeleteClick(asset)}
+                                        >
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {/* Portfolio Totals */}

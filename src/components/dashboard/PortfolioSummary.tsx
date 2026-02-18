@@ -245,28 +245,34 @@ export function PortfolioSummary({ assets, prices, isLoading }: PortfolioSummary
     return (
         <div className="space-y-8">
             {/* Holographic Metric Cards */}
-            <div className="grid gap-6 md:grid-cols-3">
-                <MetricCard
-                    title="Current Balance"
-                    value={metrics.currentBalance}
-                    format={formatCurrency}
-                    icon={Wallet}
-                    variant="default"
-                    sparkle
-                />
-                <MetricCard
-                    title="Total Invested"
-                    value={formatCurrency(metrics.totalInvested)}
-                    icon={PiggyBank}
-                    variant="default"
-                />
-                <MetricCard
-                    title="Net Profit/Loss"
-                    value={`${isProfitable ? '+' : ''}${formatCurrency(metrics.totalPnl)}`}
-                    subtitle={formatPercent(metrics.pnlPercent)}
-                    icon={isProfitable ? TrendingUp : TrendingDown}
-                    variant={isProfitable ? 'positive' : 'negative'}
-                />
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 md:grid md:grid-cols-3 md:overflow-visible md:pb-0 md:mx-0 md:px-0 scrollbar-hide">
+                <div className="snap-center min-w-[280px] w-[85vw] md:w-auto md:min-w-0">
+                    <MetricCard
+                        title="Current Balance"
+                        value={metrics.currentBalance}
+                        format={formatCurrency}
+                        icon={Wallet}
+                        variant="default"
+                        sparkle
+                    />
+                </div>
+                <div className="snap-center min-w-[280px] w-[85vw] md:w-auto md:min-w-0">
+                    <MetricCard
+                        title="Total Invested"
+                        value={formatCurrency(metrics.totalInvested)}
+                        icon={PiggyBank}
+                        variant="default"
+                    />
+                </div>
+                <div className="snap-center min-w-[280px] w-[85vw] md:w-auto md:min-w-0">
+                    <MetricCard
+                        title="Net Profit/Loss"
+                        value={`${isProfitable ? '+' : ''}${formatCurrency(metrics.totalPnl)}`}
+                        subtitle={formatPercent(metrics.pnlPercent)}
+                        icon={isProfitable ? TrendingUp : TrendingDown}
+                        variant={isProfitable ? 'positive' : 'negative'}
+                    />
+                </div>
             </div>
 
             {/* Allocation Chart */}
