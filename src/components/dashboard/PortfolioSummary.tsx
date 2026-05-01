@@ -1,24 +1,20 @@
 'use client';
 
 import { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import dynamic from 'next/dynamic';
 import { formatCurrency, formatPercent, cn } from '@/lib/utils';
+
+const PieChart = dynamic(() => import('recharts').then(m => ({ default: m.PieChart })), { ssr: false });
+const Pie = dynamic(() => import('recharts').then(m => ({ default: m.Pie })), { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Cell = dynamic(() => import('recharts').then(m => ({ default: m.Cell })) as any, { ssr: false }) as typeof import('recharts').Cell;
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(m => ({ default: m.Tooltip })), { ssr: false });
+import { CHART_COLORS } from '@/lib/colors';
 import { TrendingUp, TrendingDown, Wallet, PiggyBank, BarChart3, Sparkles } from 'lucide-react';
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import type { Asset, MarketPriceResponse } from '@/lib/types';
-
-// Chart colors - High Contrast Vibrant Fintech Palette
-const CHART_COLORS = [
-    '#6366f1', // Indigo (Primary)
-    '#ec4899', // Pink (Vibrant contrast)
-    '#10b981', // Emerald (Money/Profit)
-    '#f59e0b', // Amber (Warning/Bitcoin)
-    '#06b6d4', // Cyan (Tech)
-    '#8b5cf6', // Violet (Secondary)
-    '#ef4444', // Red (Accent)
-    '#84cc16', // Lime (Growth)
-];
 
 interface PortfolioSummaryProps {
     assets: Asset[];

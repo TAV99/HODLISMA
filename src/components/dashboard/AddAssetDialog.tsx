@@ -14,31 +14,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/lib/supabase';
+import { addCryptoAsset } from '@/lib/actions/crypto';
 import type { AssetInput } from '@/lib/types';
 import { Plus, Loader2, AlertCircle } from 'lucide-react';
-
-/**
- * Add new asset to Supabase
- */
-async function addAsset(data: AssetInput) {
-    const { data: result, error } = await supabase
-        .from('assets')
-        .insert({
-            symbol: data.symbol.toUpperCase(),
-            name: data.name || data.symbol.toUpperCase(),
-            quantity: data.quantity,
-            buy_price: data.buy_price,
-        })
-        .select()
-        .single();
-
-    if (error) {
-        throw new Error(error.message);
-    }
-
-    return result;
-}
 
 /**
  * Add Asset Dialog Component
@@ -58,7 +36,11 @@ export function AddAssetDialog() {
 
     // Mutation hook
     const mutation = useMutation({
-        mutationFn: addAsset,
+        mutationFn: async (data: AssetInput) => {
+            const result = await addCryptoAsset(data);
+            if (!result.success) throw new Error(result.error);
+            return result.data;
+        },
         onSuccess: () => {
             // Invalidate and refetch assets
             queryClient.invalidateQueries({ queryKey: ['assets'] });

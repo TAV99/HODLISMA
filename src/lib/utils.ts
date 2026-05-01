@@ -36,3 +36,10 @@ export function formatCompact(value: number): string {
   }).format(value);
 }
 
+export function formatVND(amount: number): string {
+    return new Intl.NumberFormat('vi-VN', {
+        style: 'decimal',
+        maximumFractionDigits: 0,
+    }).format(amount) + 'đ';
+}
+

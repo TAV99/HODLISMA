@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
     Table,
     TableBody,
@@ -122,39 +122,35 @@ export function AssetTable() {
     const [deleteAsset, setDeleteAsset] = useState<Asset | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-    // Calculate portfolio totals
-    const totals = assets.reduce(
-        (acc, asset) => {
-            const priceData = prices[asset.symbol.toUpperCase()];
-            const metrics = calculateMetrics(asset, priceData);
+    const { totals, totalPnlPercent } = useMemo(() => {
+        const t = assets.reduce(
+            (acc, asset) => {
+                const priceData = prices[asset.symbol.toUpperCase()];
+                const metrics = calculateMetrics(asset, priceData);
+                acc.totalValue += metrics.totalValue;
+                acc.totalInvested += metrics.investedValue;
+                acc.totalPnl += metrics.pnl;
+                return acc;
+            },
+            { totalValue: 0, totalInvested: 0, totalPnl: 0 }
+        );
+        const pnlPercent = t.totalInvested > 0
+            ? ((t.totalValue - t.totalInvested) / t.totalInvested) * 100
+            : 0;
+        return { totals: t, totalPnlPercent: pnlPercent };
+    }, [assets, prices]);
 
-            acc.totalValue += metrics.totalValue;
-            acc.totalInvested += metrics.investedValue;
-            acc.totalPnl += metrics.pnl;
-
-            return acc;
-        },
-        { totalValue: 0, totalInvested: 0, totalPnl: 0 }
-    );
-
-    const totalPnlPercent = totals.totalInvested > 0
-        ? ((totals.totalValue - totals.totalInvested) / totals.totalInvested) * 100
-        : 0;
-
-    // Handle edit click
-    const handleEdit = (asset: Asset) => {
+    const handleEdit = useCallback((asset: Asset) => {
         setEditAsset(asset);
         setIsEditOpen(true);
-    };
+    }, []);
 
-    // Handle delete click
-    const handleDeleteClick = (asset: Asset) => {
+    const handleDeleteClick = useCallback((asset: Asset) => {
         setDeleteAsset(asset);
         setIsDeleteOpen(true);
-    };
+    }, []);
 
-    // Handle delete confirm
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = useCallback(() => {
         if (deleteAsset) {
             deleteMutation.mutate(deleteAsset.id, {
                 onSuccess: () => {
@@ -163,7 +159,7 @@ export function AssetTable() {
                 },
             });
         }
-    };
+    }, [deleteAsset, deleteMutation]);
 
     return (
         <div className="relative">

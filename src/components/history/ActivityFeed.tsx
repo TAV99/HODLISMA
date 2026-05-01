@@ -9,7 +9,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
 import { getAuditLogs, rollbackFromAuditLog, type AuditLog } from '@/lib/actions/audit';
 import { ActivityCardList } from './ActivityCard';
 
@@ -74,39 +73,12 @@ export function ActivityFeed({ initialLogs = [] }: ActivityFeedProps) {
         }
     }, [initialLogs.length]);
 
-    // Real-time subscription
     useEffect(() => {
-        const channel = supabase
-            .channel('audit_logs_realtime')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'audit_logs',
-                },
-                (payload) => {
-                    const newLog: AuditLog = {
-                        id: payload.new.id,
-                        module: payload.new.module,
-                        action: payload.new.action,
-                        entityType: payload.new.entity_type,
-                        entityId: payload.new.entity_id,
-                        oldData: payload.new.old_data,
-                        newData: payload.new.new_data,
-                        triggeredBy: payload.new.triggered_by,
-                        description: payload.new.description,
-                        createdAt: payload.new.created_at,
-                    };
-                    setLogs((prev) => [newLog, ...prev]);
-                }
-            )
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, []);
+        if (initialLogs.length > 0) {
+            setLogs(initialLogs);
+            setIsLoading(false);
+        }
+    }, [initialLogs]);
 
     // Handle rollback
     const handleRollback = useCallback(async (logId: string) => {

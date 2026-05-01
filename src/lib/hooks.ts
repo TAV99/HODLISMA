@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { removeCryptoAssetById, updateCryptoAssetById } from '@/lib/actions/crypto';
 import type { Asset, AssetInput, MarketPriceResponse } from '@/lib/types';
 
 /**
@@ -87,14 +88,8 @@ export function useDeleteAsset() {
 
     return useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase
-                .from('assets')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                throw new Error(error.message);
-            }
+            const result = await removeCryptoAssetById(id);
+            if (!result.success) throw new Error(result.error);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['assets'] });
@@ -110,21 +105,9 @@ export function useUpdateAsset() {
 
     return useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<AssetInput> }) => {
-            const { data: result, error } = await supabase
-                .from('assets')
-                .update({
-                    quantity: data.quantity,
-                    buy_price: data.buy_price,
-                })
-                .eq('id', id)
-                .select()
-                .single();
-
-            if (error) {
-                throw new Error(error.message);
-            }
-
-            return result;
+            const result = await updateCryptoAssetById(id, data);
+            if (!result.success) throw new Error(result.error);
+            return result.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['assets'] });

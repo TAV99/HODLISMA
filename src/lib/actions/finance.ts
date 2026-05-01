@@ -11,6 +11,7 @@ import type {
     SavingsVault,
     SavingsVaultInput,
     MonthlySummary,
+    ActionResult,
 } from '@/lib/types';
 
 // ============================================
@@ -20,7 +21,7 @@ import type {
 /**
  * Add a new transaction
  */
-export async function addTransaction(input: TransactionInput): Promise<PersonalTransaction | null> {
+export async function addTransaction(input: TransactionInput): Promise<ActionResult<PersonalTransaction>> {
     const { data, error } = await supabase
         .from('personal_transactions')
         .insert({
@@ -38,10 +39,9 @@ export async function addTransaction(input: TransactionInput): Promise<PersonalT
 
     if (error) {
         console.error('Error adding transaction:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
-    // Audit log
     await logFinanceAction(
         'ADD_TRANSACTION',
         'transaction',
@@ -52,11 +52,10 @@ export async function addTransaction(input: TransactionInput): Promise<PersonalT
         `Added ${data.type} transaction: ${data.amount}`
     );
 
-    // Revalidate for instant UI update
     revalidatePath('/finance');
     revalidatePath('/');
 
-    return data as PersonalTransaction;
+    return { success: true, data: data as PersonalTransaction };
 }
 
 /**
@@ -65,7 +64,7 @@ export async function addTransaction(input: TransactionInput): Promise<PersonalT
 export async function updateTransaction(
     id: string,
     input: Partial<TransactionInput>
-): Promise<PersonalTransaction | null> {
+): Promise<ActionResult<PersonalTransaction>> {
     const { data, error } = await supabase
         .from('personal_transactions')
         .update({
@@ -84,18 +83,18 @@ export async function updateTransaction(
 
     if (error) {
         console.error('Error updating transaction:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
     revalidatePath('/');
-    return data as PersonalTransaction;
+    return { success: true, data: data as PersonalTransaction };
 }
 
 /**
  * Delete a transaction
  */
-export async function deleteTransaction(id: string): Promise<boolean> {
+export async function deleteTransaction(id: string): Promise<ActionResult<null>> {
     const { error } = await supabase
         .from('personal_transactions')
         .delete()
@@ -103,12 +102,12 @@ export async function deleteTransaction(id: string): Promise<boolean> {
 
     if (error) {
         console.error('Error deleting transaction:', error);
-        return false;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
     revalidatePath('/');
-    return true;
+    return { success: true, data: null };
 }
 
 /**
@@ -233,7 +232,7 @@ export async function getCategories(type?: 'income' | 'expense'): Promise<Financ
 /**
  * Add a new category
  */
-export async function addCategory(input: CategoryInput): Promise<FinanceCategory | null> {
+export async function addCategory(input: CategoryInput): Promise<ActionResult<FinanceCategory>> {
     const { data, error } = await supabase
         .from('finance_categories')
         .insert({
@@ -247,11 +246,11 @@ export async function addCategory(input: CategoryInput): Promise<FinanceCategory
 
     if (error) {
         console.error('Error adding category:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
-    return data as FinanceCategory;
+    return { success: true, data: data as FinanceCategory };
 }
 
 /**
@@ -260,7 +259,7 @@ export async function addCategory(input: CategoryInput): Promise<FinanceCategory
 export async function updateCategory(
     id: string,
     input: Partial<CategoryInput>
-): Promise<FinanceCategory | null> {
+): Promise<ActionResult<FinanceCategory>> {
     const updateData: Record<string, unknown> = {};
     if (input.name !== undefined) updateData.name = input.name;
     if (input.type !== undefined) updateData.type = input.type;
@@ -276,11 +275,11 @@ export async function updateCategory(
 
     if (error) {
         console.error('Error updating category:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
-    return data as FinanceCategory;
+    return { success: true, data: data as FinanceCategory };
 }
 
 /**
@@ -306,19 +305,16 @@ export async function getCategoryTransactionCount(categoryId: string): Promise<n
 export async function deleteCategory(
     id: string,
     force: boolean = false
-): Promise<{ success: boolean; linkedCount?: number; message: string }> {
-    // Check for linked transactions
+): Promise<ActionResult<{ linkedCount?: number }>> {
     const linkedCount = await getCategoryTransactionCount(id);
 
     if (linkedCount > 0 && !force) {
         return {
             success: false,
-            linkedCount,
-            message: `Danh mục này có ${linkedCount} giao dịch liên kết. Bạn có muốn xóa không?`,
+            error: `Danh mục này có ${linkedCount} giao dịch liên kết. Bạn có muốn xóa không?`,
         };
     }
 
-    // If has transactions and force=true, set their category_id to null
     if (linkedCount > 0) {
         await supabase
             .from('personal_transactions')
@@ -333,11 +329,11 @@ export async function deleteCategory(
 
     if (error) {
         console.error('Error deleting category:', error);
-        return { success: false, message: 'Không thể xóa danh mục' };
+        return { success: false, error: 'Không thể xóa danh mục' };
     }
 
     revalidatePath('/finance');
-    return { success: true, message: 'Đã xóa danh mục thành công' };
+    return { success: true, data: {} };
 }
 
 /**
@@ -412,7 +408,7 @@ export async function getSavingsVaults(includeCompleted = true): Promise<Savings
 /**
  * Add a new savings vault
  */
-export async function addSavingsVault(input: SavingsVaultInput): Promise<SavingsVault | null> {
+export async function addSavingsVault(input: SavingsVaultInput): Promise<ActionResult<SavingsVault>> {
     const { data, error } = await supabase
         .from('savings_vault')
         .insert({
@@ -425,11 +421,11 @@ export async function addSavingsVault(input: SavingsVaultInput): Promise<Savings
 
     if (error) {
         console.error('Error adding savings vault:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
-    return data as SavingsVault;
+    return { success: true, data: data as SavingsVault };
 }
 
 /**
@@ -438,7 +434,7 @@ export async function addSavingsVault(input: SavingsVaultInput): Promise<Savings
 export async function updateSavingsVault(
     id: string,
     input: Partial<SavingsVaultInput>
-): Promise<SavingsVault | null> {
+): Promise<ActionResult<SavingsVault>> {
     const { data, error } = await supabase
         .from('savings_vault')
         .update({
@@ -452,17 +448,17 @@ export async function updateSavingsVault(
 
     if (error) {
         console.error('Error updating savings vault:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
-    return data as SavingsVault;
+    return { success: true, data: data as SavingsVault };
 }
 
 /**
  * Delete a savings vault
  */
-export async function deleteSavingsVault(id: string): Promise<boolean> {
+export async function deleteSavingsVault(id: string): Promise<ActionResult<null>> {
     const { error } = await supabase
         .from('savings_vault')
         .delete()
@@ -470,18 +466,17 @@ export async function deleteSavingsVault(id: string): Promise<boolean> {
 
     if (error) {
         console.error('Error deleting savings vault:', error);
-        return false;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/finance');
-    return true;
+    return { success: true, data: null };
 }
 
 /**
  * Add amount to a savings vault
  */
-export async function addToSavingsVault(id: string, amount: number): Promise<SavingsVault | null> {
-    // First get current amount
+export async function addToSavingsVault(id: string, amount: number): Promise<ActionResult<SavingsVault>> {
     const { data: vault, error: fetchError } = await supabase
         .from('savings_vault')
         .select('current_amount')
@@ -490,7 +485,7 @@ export async function addToSavingsVault(id: string, amount: number): Promise<Sav
 
     if (fetchError || !vault) {
         console.error('Error fetching vault:', fetchError);
-        return null;
+        return { success: false, error: fetchError?.message ?? 'Vault not found' };
     }
 
     const newAmount = Number(vault.current_amount) + amount;

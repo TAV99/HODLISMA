@@ -102,7 +102,6 @@ export default function FinanceClient({
                         isLoading={isLoading}
                         onAddClick={() => {
                             // TODO: Open add transaction dialog
-                            console.log('Add transaction clicked');
                         }}
                     />
                 </section>

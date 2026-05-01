@@ -1,9 +1,18 @@
 'use client';
 
 import { useMemo } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import dynamic from 'next/dynamic';
 import { PieChart as PieChartIcon } from 'lucide-react';
+
+const PieChart = dynamic(() => import('recharts').then(m => ({ default: m.PieChart })), { ssr: false });
+const Pie = dynamic(() => import('recharts').then(m => ({ default: m.Pie })), { ssr: false });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const Cell = dynamic(() => import('recharts').then(m => ({ default: m.Cell })) as any, { ssr: false }) as typeof import('recharts').Cell;
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(m => ({ default: m.Tooltip })), { ssr: false });
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';
+import { formatVND } from '@/lib/utils';
+import { EXPENSE_COLORS } from '@/lib/colors';
 import type { PersonalTransaction } from '@/lib/types';
 
 interface ExpenseChartProps {
@@ -11,33 +20,11 @@ interface ExpenseChartProps {
     isLoading?: boolean;
 }
 
-// Vibrant expense category colors
-const EXPENSE_COLORS = [
-    '#f97316', // Orange - Food
-    '#ef4444', // Red - Bills
-    '#ec4899', // Pink - Shopping
-    '#a855f7', // Purple - Entertainment
-    '#06b6d4', // Cyan - Transport
-    '#14b8a6', // Teal - Health
-    '#3b82f6', // Blue - Education
-    '#64748b', // Slate - Other
-];
-
 interface CategoryData {
     name: string;
     value: number;
     percent: number;
     color: string;
-}
-
-/**
- * Format number as VND currency
- */
-function formatVND(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'decimal',
-        maximumFractionDigits: 0,
-    }).format(amount) + 'đ';
 }
 
 /**

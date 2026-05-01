@@ -2,6 +2,8 @@
 // CryptoVibe Dashboard - TypeScript Interfaces
 // ============================================
 
+export type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
+
 /**
  * Asset entity - Represents a crypto holding in the portfolio
  */

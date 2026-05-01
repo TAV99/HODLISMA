@@ -1,11 +1,9 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useMemo } from 'react';
 import { Wallet, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Scale } from 'lucide-react';
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';
-import { cn } from '@/lib/utils';
-import { supabase } from '@/lib/supabase';
+import { cn, formatVND } from '@/lib/utils';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 import type { MonthlySummary } from '@/lib/types';
 
@@ -13,18 +11,6 @@ interface FinanceSummaryProps {
     summary: MonthlySummary;
     isLoading?: boolean;
 }
-
-/**
- * Format number as VND currency
- */
-function formatVND(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'decimal',
-        maximumFractionDigits: 0,
-    }).format(amount) + 'đ';
-}
-
-
 
 /**
  * Premium Metric Card for Finance
@@ -136,30 +122,6 @@ function SummarySkeleton() {
  * Displays key financial metrics with holographic card effect
  */
 export function FinanceSummary({ summary, isLoading }: FinanceSummaryProps) {
-    const router = useRouter();
-
-    // Real-time subscription to refresh data when transactions change
-    useEffect(() => {
-        const channel = supabase
-            .channel('finance_summary_realtime')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'personal_transactions',
-                },
-                () => {
-                    router.refresh();
-                }
-            )
-            .subscribe();
-
-        return () => {
-            supabase.removeChannel(channel);
-        };
-    }, [router]);
-
     const netBalance = useMemo(() => {
         return summary.total_income - summary.total_expense;
     }, [summary]);

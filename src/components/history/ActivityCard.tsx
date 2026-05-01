@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { type AuditLog } from '@/lib/actions/audit';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { MouseEvent } from 'react';
+import { memo, type MouseEvent } from 'react';
 
 interface ActivityCardProps {
     log: AuditLog;
@@ -97,7 +97,7 @@ function getRareStatus(log: AuditLog): boolean {
  * ActivityCard Component
  * Refined Light-Prisma Style with Holographic Touch & Rare Glow
  */
-export function ActivityCard({ log, onRollback, isRollingBack }: ActivityCardProps) {
+export const ActivityCard = memo(function ActivityCard({ log, onRollback, isRollingBack }: ActivityCardProps) {
     const isCrypto = log.module === 'CRYPTO';
     const isAI = log.triggeredBy === 'AI_HODLISMA';
     const canRollback = log.oldData !== null || log.action.includes('ADD');
@@ -308,7 +308,7 @@ export function ActivityCard({ log, onRollback, isRollingBack }: ActivityCardPro
             </div>
         </motion.div>
     );
-}
+});
 
 /**
  * ActivityCardList Component

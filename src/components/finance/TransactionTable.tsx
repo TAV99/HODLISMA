@@ -11,23 +11,13 @@ import {
 } from 'lucide-react';
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, formatVND } from '@/lib/utils';
 import type { PersonalTransaction } from '@/lib/types';
 
 interface TransactionTableProps {
     transactions: PersonalTransaction[];
     isLoading?: boolean;
     onAddClick?: () => void;
-}
-
-/**
- * Format number as VND currency
- */
-function formatVND(amount: number): string {
-    return new Intl.NumberFormat('vi-VN', {
-        style: 'decimal',
-        maximumFractionDigits: 0,
-    }).format(amount) + 'đ';
 }
 
 /**

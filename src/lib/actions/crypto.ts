@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import { logCryptoAction } from '@/lib/actions/audit';
-import type { Asset, AssetInput } from '@/lib/types';
+import type { Asset, AssetInput, ActionResult } from '@/lib/types';
 
 // ============================================
 // CRYPTO ASSET SERVER ACTIONS
@@ -12,7 +12,7 @@ import type { Asset, AssetInput } from '@/lib/types';
 /**
  * Add a new crypto asset to portfolio
  */
-export async function addCryptoAsset(input: AssetInput): Promise<Asset | null> {
+export async function addCryptoAsset(input: AssetInput): Promise<ActionResult<Asset>> {
     const { data, error } = await supabase
         .from('assets')
         .insert({
@@ -26,10 +26,9 @@ export async function addCryptoAsset(input: AssetInput): Promise<Asset | null> {
 
     if (error) {
         console.error('Error adding crypto asset:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
-    // Audit log
     await logCryptoAction(
         'ADD_ASSET',
         data.id,
@@ -39,10 +38,9 @@ export async function addCryptoAsset(input: AssetInput): Promise<Asset | null> {
         `Added ${data.quantity} ${data.symbol} @ $${data.buy_price}`
     );
 
-    // Revalidate for instant UI update
     revalidatePath('/');
 
-    return data as Asset;
+    return { success: true, data: data as Asset };
 }
 
 /**
@@ -52,8 +50,7 @@ export async function updateCryptoQuantity(
     symbol: string,
     newQuantity: number,
     newAvgPrice?: number
-): Promise<Asset | null> {
-    // Find asset by symbol
+): Promise<ActionResult<Asset>> {
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -62,7 +59,7 @@ export async function updateCryptoQuantity(
 
     if (findError || !existing) {
         console.error('Asset not found:', findError);
-        return null;
+        return { success: false, error: findError?.message ?? 'Asset not found' };
     }
 
     const updateData: { quantity: number; buy_price?: number } = {
@@ -82,10 +79,10 @@ export async function updateCryptoQuantity(
 
     if (error) {
         console.error('Error updating crypto asset:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
-    return data as Asset;
+    return { success: true, data: data as Asset };
 }
 
 /**
@@ -95,8 +92,7 @@ export async function buyCrypto(
     symbol: string,
     additionalQuantity: number,
     buyPrice: number
-): Promise<Asset | null> {
-    // Find existing asset
+): Promise<ActionResult<Asset>> {
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -104,7 +100,6 @@ export async function buyCrypto(
         .single();
 
     if (findError || !existing) {
-        // If not found, create new position
         return addCryptoAsset({
             symbol: symbol.toUpperCase(),
             quantity: additionalQuantity,
@@ -112,7 +107,6 @@ export async function buyCrypto(
         });
     }
 
-    // Calculate new weighted average price
     const currentTotal = existing.quantity * existing.buy_price;
     const additionTotal = additionalQuantity * buyPrice;
     const newQuantity = existing.quantity + additionalQuantity;
@@ -130,10 +124,9 @@ export async function buyCrypto(
 
     if (error) {
         console.error('Error buying more crypto:', error);
-        return null;
+        return { success: false, error: error.message };
     }
 
-    // Audit log
     await logCryptoAction(
         'BUY_MORE',
         data.id,
@@ -143,10 +136,9 @@ export async function buyCrypto(
         `Bought ${additionalQuantity} more ${symbol.toUpperCase()}`
     );
 
-    // Revalidate for instant UI update
     revalidatePath('/');
 
-    return data as Asset;
+    return { success: true, data: data as Asset };
 }
 
 /**
@@ -155,8 +147,7 @@ export async function buyCrypto(
 export async function sellCrypto(
     symbol: string,
     sellQuantity: number
-): Promise<{ success: boolean; remainingQuantity: number; removed: boolean }> {
-    // Find existing asset
+): Promise<ActionResult<{ remainingQuantity: number; removed: boolean }>> {
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -164,12 +155,11 @@ export async function sellCrypto(
         .single();
 
     if (findError || !existing) {
-        return { success: false, remainingQuantity: 0, removed: false };
+        return { success: false, error: findError?.message ?? 'Asset not found' };
     }
 
     const remainingQuantity = existing.quantity - sellQuantity;
 
-    // If selling all, remove the asset
     if (remainingQuantity <= 0) {
         const { error } = await supabase
             .from('assets')
@@ -178,14 +168,13 @@ export async function sellCrypto(
 
         if (error) {
             console.error('Error removing crypto asset:', error);
-            return { success: false, remainingQuantity: existing.quantity, removed: false };
+            return { success: false, error: error.message };
         }
 
         revalidatePath('/');
-        return { success: true, remainingQuantity: 0, removed: true };
+        return { success: true, data: { remainingQuantity: 0, removed: true } };
     }
 
-    // Otherwise update quantity
     const { error } = await supabase
         .from('assets')
         .update({ quantity: remainingQuantity })
@@ -193,17 +182,17 @@ export async function sellCrypto(
 
     if (error) {
         console.error('Error selling crypto:', error);
-        return { success: false, remainingQuantity: existing.quantity, removed: false };
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/');
-    return { success: true, remainingQuantity, removed: false };
+    return { success: true, data: { remainingQuantity, removed: false } };
 }
 
 /**
- * Remove a crypto asset completely from portfolio
+ * Remove a crypto asset completely from portfolio (by symbol, used by chat route)
  */
-export async function removeCryptoAsset(symbol: string): Promise<boolean> {
+export async function removeCryptoAsset(symbol: string): Promise<ActionResult<null>> {
     const { error } = await supabase
         .from('assets')
         .delete()
@@ -211,11 +200,90 @@ export async function removeCryptoAsset(symbol: string): Promise<boolean> {
 
     if (error) {
         console.error('Error removing crypto asset:', error);
-        return false;
+        return { success: false, error: error.message };
     }
 
     revalidatePath('/');
-    return true;
+    return { success: true, data: null };
+}
+
+export async function removeCryptoAssetById(id: string): Promise<ActionResult<null>> {
+    const { data: existing, error: findError } = await supabase
+        .from('assets')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (findError || !existing) {
+        console.error('Asset not found for deletion:', findError);
+        return { success: false, error: findError?.message ?? 'Asset not found' };
+    }
+
+    const { error } = await supabase
+        .from('assets')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error('Error removing crypto asset:', error);
+        return { success: false, error: error.message };
+    }
+
+    await logCryptoAction(
+        'REMOVE_ASSET',
+        id,
+        { symbol: existing.symbol, quantity: existing.quantity, buy_price: existing.buy_price },
+        null,
+        'USER_MANUAL',
+        `Removed ${existing.symbol} from portfolio`
+    );
+
+    revalidatePath('/');
+    return { success: true, data: null };
+}
+
+export async function updateCryptoAssetById(
+    id: string,
+    data: Partial<AssetInput>
+): Promise<ActionResult<Asset>> {
+    const { data: existing, error: findError } = await supabase
+        .from('assets')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (findError || !existing) {
+        console.error('Asset not found for update:', findError);
+        return { success: false, error: findError?.message ?? 'Asset not found' };
+    }
+
+    const updateData: Record<string, unknown> = {};
+    if (data.quantity !== undefined) updateData.quantity = data.quantity;
+    if (data.buy_price !== undefined) updateData.buy_price = data.buy_price;
+
+    const { data: updated, error } = await supabase
+        .from('assets')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error updating crypto asset:', error);
+        return { success: false, error: error.message };
+    }
+
+    await logCryptoAction(
+        'UPDATE_ASSET',
+        id,
+        { symbol: existing.symbol, quantity: existing.quantity, buy_price: existing.buy_price },
+        { symbol: updated.symbol, quantity: updated.quantity, buy_price: updated.buy_price },
+        'USER_MANUAL',
+        `Updated ${existing.symbol}: quantity ${existing.quantity} → ${updated.quantity}, price $${existing.buy_price} → $${updated.buy_price}`
+    );
+
+    revalidatePath('/');
+    return { success: true, data: updated as Asset };
 }
 
 /**

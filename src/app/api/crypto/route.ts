@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import type { MarketData, MarketPriceResponse } from '@/lib/types';
 
 // CoinMarketCap API endpoint
-const CMC_API_URL = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
+const CMC_API_URL = process.env.CMC_API_URL || 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 
 // Cache configuration: revalidate every 60 seconds
 export const revalidate = 60;

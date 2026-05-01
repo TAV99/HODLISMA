@@ -1,13 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useChat } from 'ai/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { usePortfolio } from '@/lib/hooks';
-import ReactMarkdown from 'react-markdown';
+import dynamic from 'next/dynamic';
 import { Bot, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+const ReactMarkdown = dynamic(() => import('react-markdown'), {
+    ssr: false,
+    loading: () => <span className="text-slate-400">...</span>,
+});
 
 /**
  * Holographic Chat Widget Component
@@ -24,54 +29,54 @@ export function ChatWidget() {
     const pageContext = pathname.startsWith('/finance') ? 'finance' : 'crypto';
     const isFinancePage = pageContext === 'finance';
 
-    // Calculate portfolio totals and metrics
-    const portfolioContext = {
-        currentPage: pageContext,
-        assets: assets.map(asset => {
-            const priceData = prices[asset.symbol.toUpperCase()];
-            const currentPrice = priceData?.price ?? 0;
-            const totalValue = asset.quantity * currentPrice;
-            const investedValue = asset.quantity * asset.buy_price;
-            const pnl = totalValue - investedValue;
-            const pnlPercent = asset.buy_price > 0 ? ((currentPrice - asset.buy_price) / asset.buy_price) * 100 : 0;
-
-            return {
-                symbol: asset.symbol,
-                name: asset.name,
-                quantity: asset.quantity,
-                buyPrice: asset.buy_price,
-                currentPrice,
-                totalValue,
-                pnl,
-                pnlPercent,
-                percentChange24h: priceData?.percent_change_24h ?? 0,
-            };
-        }),
-        totals: assets.reduce(
-            (acc, asset) => {
+    const portfolioContext = useMemo(() => {
+        const ctx = {
+            currentPage: pageContext,
+            assets: assets.map(asset => {
                 const priceData = prices[asset.symbol.toUpperCase()];
                 const currentPrice = priceData?.price ?? 0;
                 const totalValue = asset.quantity * currentPrice;
                 const investedValue = asset.quantity * asset.buy_price;
                 const pnl = totalValue - investedValue;
+                const pnlPercent = asset.buy_price > 0 ? ((currentPrice - asset.buy_price) / asset.buy_price) * 100 : 0;
 
-                acc.totalInvested += investedValue;
-                acc.totalValue += totalValue;
-                acc.totalPnl += pnl;
+                return {
+                    symbol: asset.symbol,
+                    name: asset.name,
+                    quantity: asset.quantity,
+                    buyPrice: asset.buy_price,
+                    currentPrice,
+                    totalValue,
+                    pnl,
+                    pnlPercent,
+                    percentChange24h: priceData?.percent_change_24h ?? 0,
+                };
+            }),
+            totals: assets.reduce(
+                (acc, asset) => {
+                    const priceData = prices[asset.symbol.toUpperCase()];
+                    const currentPrice = priceData?.price ?? 0;
+                    const totalValue = asset.quantity * currentPrice;
+                    const investedValue = asset.quantity * asset.buy_price;
+                    const pnl = totalValue - investedValue;
 
-                return acc;
-            },
-            { totalInvested: 0, totalValue: 0, totalPnl: 0, totalPnlPercent: 0 }
-        ),
-    };
+                    acc.totalInvested += investedValue;
+                    acc.totalValue += totalValue;
+                    acc.totalPnl += pnl;
 
-    // Calculate total PnL percentage
-    portfolioContext.totals.totalPnlPercent =
-        portfolioContext.totals.totalInvested > 0
-            ? ((portfolioContext.totals.totalValue - portfolioContext.totals.totalInvested) /
-                portfolioContext.totals.totalInvested) *
-            100
-            : 0;
+                    return acc;
+                },
+                { totalInvested: 0, totalValue: 0, totalPnl: 0, totalPnlPercent: 0 }
+            ),
+        };
+        ctx.totals.totalPnlPercent =
+            ctx.totals.totalInvested > 0
+                ? ((ctx.totals.totalValue - ctx.totals.totalInvested) /
+                    ctx.totals.totalInvested) *
+                100
+                : 0;
+        return ctx;
+    }, [assets, prices, pageContext]);
 
     const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
         api: '/api/chat',
