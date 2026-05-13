@@ -39,17 +39,6 @@ export interface MarketData {
 }
 
 /**
- * Combined asset with market data for display
- */
-export interface AssetWithMarketData extends Asset {
-    current_price: number;
-    percent_change_24h: number;
-    total_value: number;
-    pnl: number;
-    pnl_percent: number;
-}
-
-/**
  * Portfolio summary statistics
  */
 export interface PortfolioSummary {
@@ -65,14 +54,6 @@ export interface PortfolioSummary {
  */
 export interface MarketPriceResponse {
     [symbol: string]: MarketData;
-}
-
-/**
- * API error response
- */
-export interface ApiError {
-    message: string;
-    status?: number;
 }
 
 // ============================================

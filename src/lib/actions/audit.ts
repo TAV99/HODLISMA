@@ -1,6 +1,6 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 
 // ============================================
 // AUDIT LOG TYPES
@@ -35,6 +35,7 @@ export interface AuditLog extends AuditLogInput {
  */
 export async function createAuditLog(input: AuditLogInput): Promise<string | null> {
     try {
+        const supabase = await createClient();
         const { data, error } = await supabase
             .from('audit_logs')
             .insert({
@@ -125,6 +126,7 @@ export async function getAuditLogs(options?: {
     limit?: number;
     offset?: number;
 }): Promise<AuditLog[]> {
+    const supabase = await createClient();
     let query = supabase
         .from('audit_logs')
         .select('*')
@@ -167,6 +169,7 @@ export async function getEntityAuditHistory(
     entityType: string,
     entityId: string
 ): Promise<AuditLog[]> {
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -203,7 +206,7 @@ export async function getEntityAuditHistory(
 export async function rollbackFromAuditLog(
     auditLogId: string
 ): Promise<{ success: boolean; message: string }> {
-    // Get the audit log entry
+    const supabase = await createClient();
     const { data: log, error: fetchError } = await supabase
         .from('audit_logs')
         .select('*')

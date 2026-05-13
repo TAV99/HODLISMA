@@ -271,3 +271,12 @@
   animation: fade-in 0.3s ease-out;
 }
 
+/* Hide all scrollbars globally */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+

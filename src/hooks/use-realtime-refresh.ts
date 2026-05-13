@@ -2,7 +2,9 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
 
 export function useRealtimeRefresh(tables: string[] = ['personal_transactions', 'assets']) {
     const router = useRouter();

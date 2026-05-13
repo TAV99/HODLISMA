@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/server';
 import { logCryptoAction } from '@/lib/actions/audit';
 import type { Asset, AssetInput, ActionResult } from '@/lib/types';
 
@@ -13,6 +13,7 @@ import type { Asset, AssetInput, ActionResult } from '@/lib/types';
  * Add a new crypto asset to portfolio
  */
 export async function addCryptoAsset(input: AssetInput): Promise<ActionResult<Asset>> {
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('assets')
         .insert({
@@ -51,6 +52,7 @@ export async function updateCryptoQuantity(
     newQuantity: number,
     newAvgPrice?: number
 ): Promise<ActionResult<Asset>> {
+    const supabase = await createClient();
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -93,6 +95,7 @@ export async function buyCrypto(
     additionalQuantity: number,
     buyPrice: number
 ): Promise<ActionResult<Asset>> {
+    const supabase = await createClient();
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -148,6 +151,7 @@ export async function sellCrypto(
     symbol: string,
     sellQuantity: number
 ): Promise<ActionResult<{ remainingQuantity: number; removed: boolean }>> {
+    const supabase = await createClient();
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -193,6 +197,7 @@ export async function sellCrypto(
  * Remove a crypto asset completely from portfolio (by symbol, used by chat route)
  */
 export async function removeCryptoAsset(symbol: string): Promise<ActionResult<null>> {
+    const supabase = await createClient();
     const { error } = await supabase
         .from('assets')
         .delete()
@@ -208,6 +213,7 @@ export async function removeCryptoAsset(symbol: string): Promise<ActionResult<nu
 }
 
 export async function removeCryptoAssetById(id: string): Promise<ActionResult<null>> {
+    const supabase = await createClient();
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -246,6 +252,7 @@ export async function updateCryptoAssetById(
     id: string,
     data: Partial<AssetInput>
 ): Promise<ActionResult<Asset>> {
+    const supabase = await createClient();
     const { data: existing, error: findError } = await supabase
         .from('assets')
         .select('*')
@@ -290,6 +297,7 @@ export async function updateCryptoAssetById(
  * Get all crypto assets in portfolio
  */
 export async function getCryptoAssets(): Promise<Asset[]> {
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('assets')
         .select('*')
@@ -307,6 +315,7 @@ export async function getCryptoAssets(): Promise<Asset[]> {
  * Get a specific crypto asset by symbol
  */
 export async function getCryptoAsset(symbol: string): Promise<Asset | null> {
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('assets')
         .select('*')

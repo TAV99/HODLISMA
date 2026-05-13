@@ -1,7 +1,9 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
+
+const supabase = createClient();
 import { removeCryptoAssetById, updateCryptoAssetById } from '@/lib/actions/crypto';
 import type { Asset, AssetInput, MarketPriceResponse } from '@/lib/types';
 

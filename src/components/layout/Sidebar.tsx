@@ -71,7 +71,7 @@ export function Sidebar() {
     return (
         <aside
             className={cn(
-                "fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out",
+                "fixed left-0 top-0 z-40 h-screen flex flex-col transition-all duration-300 ease-in-out",
                 "bg-slate-900/95 backdrop-blur-xl border-r border-white/10",
                 collapsed ? "w-20" : "w-64"
             )}
@@ -98,7 +98,7 @@ export function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav className="p-3 space-y-6 overflow-y-auto h-[calc(100vh-8rem)]">
+            <nav className="flex-1 p-3 space-y-6 overflow-y-auto">
                 {NAV_SECTIONS.map((section) => (
                     <div key={section.title}>
                         {!collapsed && (
@@ -144,8 +144,8 @@ export function Sidebar() {
                 ))}
             </nav>
 
-            {/* Logout Button */}
-            <div className="px-3 pb-2">
+            {/* Bottom: Logout + Collapse Toggle */}
+            <div className="p-3 border-t border-white/10 space-y-1">
                 <button
                     onClick={handleLogout}
                     className={cn(
@@ -160,10 +160,6 @@ export function Sidebar() {
                         <span className="text-sm font-medium">Đăng xuất</span>
                     )}
                 </button>
-            </div>
-
-            {/* Collapse Toggle */}
-            <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10">
                 <button
                     onClick={toggle}
                     className={cn(
