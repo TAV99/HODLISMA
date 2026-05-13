@@ -147,3 +147,52 @@ export interface CategoryInput {
     icon?: string;
     color?: string;
 }
+
+// ============================================
+// Market Trends - TypeScript Interfaces
+// ============================================
+
+export interface CoinListing {
+    id: number;
+    name: string;
+    symbol: string;
+    cmc_rank: number;
+    price: number;
+    percent_change_24h: number;
+    percent_change_7d: number;
+    market_cap: number;
+    volume_24h: number;
+    last_updated: string;
+}
+
+export interface FearGreedData {
+    value: number;
+    classification: string;
+    timestamp: string;
+}
+
+export interface BenchmarkPoint {
+    date: string;
+    portfolio: number;
+    btc: number;
+    eth: number;
+}
+
+export interface WatchlistItem {
+    id: string;
+    user_id: string;
+    symbol: string;
+    name: string;
+    added_at: string;
+}
+
+export interface PriceAlert {
+    id: string;
+    user_id: string;
+    symbol: string;
+    condition: 'above' | 'below';
+    target_price: number;
+    is_triggered: boolean;
+    triggered_at: string | null;
+    created_at: string;
+}
