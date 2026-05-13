@@ -4,8 +4,7 @@ import type { MarketData, MarketPriceResponse } from '@/lib/types';
 // CoinMarketCap API endpoint
 const CMC_API_URL = process.env.CMC_API_URL || 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest';
 
-// Cache configuration: revalidate every 60 seconds
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 /**
  * CMC API Response Types (partial, only what we need)
