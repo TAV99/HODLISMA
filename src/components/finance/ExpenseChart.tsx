@@ -4,10 +4,10 @@ import { useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { PieChart as PieChartIcon } from 'lucide-react';
 
+import { Cell } from 'recharts';
+
 const PieChart = dynamic(() => import('recharts').then(m => ({ default: m.PieChart })), { ssr: false });
 const Pie = dynamic(() => import('recharts').then(m => ({ default: m.Pie })), { ssr: false });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Cell = dynamic(() => import('recharts').then(m => ({ default: m.Cell })) as any, { ssr: false }) as typeof import('recharts').Cell;
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => ({ default: m.ResponsiveContainer })), { ssr: false });
 const Tooltip = dynamic(() => import('recharts').then(m => ({ default: m.Tooltip })), { ssr: false });
 import { HoloCardWrapper } from '@/components/ui/HoloCardWrapper';

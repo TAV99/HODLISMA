@@ -1,18 +1,10 @@
-import { createOpenAI } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { streamText } from 'ai';
 import { getFinanceToolDefinitions } from './tools/finance-tools';
 import { getCryptoToolDefinitions } from './tools/crypto-tools';
+import { getExternalToolDefinitions } from './tools/external-tools';
 
-export const maxDuration = 30;
-
-const openrouter = createOpenAI({
-    baseURL: process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1',
-    apiKey: process.env.OPENROUTER_API_KEY,
-    headers: {
-        'HTTP-Referer': process.env.APP_REFERER_URL || 'https://hodlisma.vercel.app',
-        'X-Title': 'HODLISMA Portfolio',
-    },
-});
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
     try {
@@ -52,12 +44,15 @@ export async function POST(req: Request) {
 **Tháng/Năm:** ${currentMonth}/${currentYear}
 
 **Phong cách:** Thân thiện, ngắn gọn. Luôn xác nhận sau khi thực hiện.
+**Tìm kiếm web:** Bạn có khả năng tìm kiếm Google Search để tra cứu thông tin bên ngoài (tin tức, giá cả, sự kiện). Hãy chủ động search khi người dùng hỏi về thông tin thời sự.
+
 **Ưu tiên:** Sử dụng tools để thao tác với database.`
             : `You are HODLISMA AI, an elite crypto Portfolio Executor.
 
 **ROLE:** You have DIRECT ACCESS to the user's crypto database. You can add, update, and remove assets.
 
-**Current Portfolio:** ${JSON.stringify(portfolioContext)}
+**Portfolio Summary:** ${portfolioContext?.assets?.length || 0} assets | Total Invested: $${portfolioContext?.totals?.totalInvested?.toFixed(2) || '0'} | Current Value: $${portfolioContext?.totals?.totalValue?.toFixed(2) || '0'} | P&L: ${portfolioContext?.totals?.totalPnlPercent?.toFixed(1) || '0'}%
+**Use getCryptoPortfolio tool for detailed asset data.**
 **Current Date:** ${currentDate.toLocaleDateString('en-US')}
 
 **CRITICAL RULES:**
@@ -67,10 +62,10 @@ export async function POST(req: Request) {
 4. When user says "sell", use sellCrypto tool
 5. Be professional, data-driven, and concise
 
-**Available Tools:** addCryptoAsset, buyCrypto, sellCrypto, removeCryptoAsset, getCryptoPortfolio`;
+**Available Tools:** addCryptoAsset, buyCrypto, sellCrypto, removeCryptoAsset, getCryptoPortfolio, webSearch (search the web for any info), getCryptoNews (latest crypto news)`;
 
         const result = await streamText({
-            model: openrouter('nvidia/nemotron-3-super-120b-a12b:free'),
+            model: google('gemini-2.5-flash'),
             messages: [
                 { role: 'system', content: systemPrompt },
                 ...messages,
@@ -78,8 +73,10 @@ export async function POST(req: Request) {
             tools: {
                 ...getFinanceToolDefinitions(currentMonth, currentYear),
                 ...getCryptoToolDefinitions(),
+                ...getExternalToolDefinitions(),
             },
-            maxSteps: 5,
+            maxTokens: 4096,
+            maxSteps: 8,
         });
 
         return result.toDataStreamResponse();

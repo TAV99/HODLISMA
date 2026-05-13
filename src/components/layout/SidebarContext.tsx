@@ -6,6 +6,8 @@ interface SidebarContextValue {
     collapsed: boolean;
     setCollapsed: (collapsed: boolean) => void;
     toggle: () => void;
+    chatPanelOpen: boolean;
+    setChatPanelOpen: (open: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
@@ -20,11 +22,12 @@ export function useSidebar() {
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
     const [collapsed, setCollapsed] = useState(false);
+    const [chatPanelOpen, setChatPanelOpen] = useState(false);
 
     const toggle = () => setCollapsed((prev) => !prev);
 
     return (
-        <SidebarContext.Provider value={{ collapsed, setCollapsed, toggle }}>
+        <SidebarContext.Provider value={{ collapsed, setCollapsed, toggle, chatPanelOpen, setChatPanelOpen }}>
             {children}
         </SidebarContext.Provider>
     );

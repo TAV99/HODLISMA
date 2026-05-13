@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     Bitcoin,
     Wallet,
@@ -12,7 +12,9 @@ import {
     TrendingUp,
     PiggyBank,
     Clock,
+    LogOut,
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import { useSidebar } from './SidebarContext';
 
@@ -57,7 +59,14 @@ const NAV_SECTIONS: NavSection[] = [
  */
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
     const { collapsed, toggle } = useSidebar();
+
+    const handleLogout = async () => {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        router.push('/login');
+    };
 
     return (
         <aside
@@ -134,6 +143,24 @@ export function Sidebar() {
                     </div>
                 ))}
             </nav>
+
+            {/* Logout Button */}
+            <div className="px-3 pb-2">
+                <button
+                    onClick={handleLogout}
+                    className={cn(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                        "text-slate-400 hover:text-rose-400 hover:bg-rose-500/10",
+                        collapsed && "justify-center px-2"
+                    )}
+                    title={collapsed ? "Đăng xuất" : undefined}
+                >
+                    <LogOut className="h-5 w-5 flex-shrink-0" />
+                    {!collapsed && (
+                        <span className="text-sm font-medium">Đăng xuất</span>
+                    )}
+                </button>
+            </div>
 
             {/* Collapse Toggle */}
             <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-white/10">

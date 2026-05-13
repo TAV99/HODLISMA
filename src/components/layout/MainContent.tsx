@@ -7,13 +7,14 @@ import { cn } from '@/lib/utils';
  * Main Content wrapper that adjusts margin based on sidebar state
  */
 export function MainContent({ children }: { children: React.ReactNode }) {
-    const { collapsed } = useSidebar();
+    const { collapsed, chatPanelOpen } = useSidebar();
 
     return (
         <main
             className={cn(
                 "flex-1 overflow-y-auto transition-all duration-300 ease-in-out relative z-10",
-                collapsed ? "ml-20" : "ml-64"
+                collapsed ? "ml-20" : "ml-64",
+                chatPanelOpen && "mr-[400px]"
             )}
         >
             {children}
